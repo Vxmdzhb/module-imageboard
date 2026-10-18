@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -10,7 +10,8 @@ use AstrX\Imageboard\BoardRepository;
 use AstrX\Result\DiagnosticsCollector;
 use AstrX\Result\Result;
 use AstrX\Routing\UrlGenerator;
-use AstrX\Site\DefaultTemplateContext;
+use AstrX\Template\TemplateVars;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Admin — Imageboard board list (read-only overview).
@@ -25,7 +26,7 @@ final class AdminBoardsController extends AbstractController
 {
     public function __construct(
         DiagnosticsCollector                    $collector,
-        private readonly DefaultTemplateContext $ctx,
+        private readonly TemplateVars $ctx,
         private readonly BoardRepository        $boards,
         private readonly Gate                   $gate,
         private readonly UrlGenerator           $urlGen,

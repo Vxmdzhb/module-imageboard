@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -27,9 +27,10 @@ use AstrX\Routing\CurrentUrl;
 use AstrX\Routing\UrlGenerator;
 use AstrX\Session\FlashBag;
 use AstrX\Session\PrgHandler;
-use AstrX\Site\DefaultTemplateContext;
+use AstrX\Template\TemplateVars;
 use AstrX\User\UserSession;
 use function AstrX\Support\langDir;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Imageboard dispatcher — one template=1 page (WORDING_BOARD, file_name 'board')
@@ -60,7 +61,7 @@ final class BoardController extends AbstractController
 
     public function __construct(
         \AstrX\Result\DiagnosticsCollector      $collector,
-        private readonly DefaultTemplateContext $ctx,
+        private readonly TemplateVars $ctx,
         private readonly Request                $request,
         private readonly CurrentUrl             $currentUrl,
         private readonly BoardRepository        $boards,

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -13,8 +13,9 @@ use AstrX\Imageboard\PostRepository;
 use AstrX\Result\DiagnosticsCollector;
 use AstrX\Result\Result;
 use AstrX\Routing\UrlGenerator;
-use AstrX\Site\DefaultTemplateContext;
+use AstrX\Template\TemplateVars;
 use function AstrX\Support\langDir;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Post/thread search — a no-JavaScript GET form over post subject/body with an
@@ -34,7 +35,7 @@ final class BoardSearchController extends AbstractController
 
     public function __construct(
         DiagnosticsCollector                    $collector,
-        private readonly DefaultTemplateContext $ctx,
+        private readonly TemplateVars $ctx,
         private readonly Request                $request,
         private readonly Gate                   $gate,
         private readonly Translator             $t,

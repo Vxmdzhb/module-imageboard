@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -10,6 +10,7 @@ use AstrX\Imageboard\ImageboardConfig;
 use AstrX\Imageboard\ImageRepository;
 use AstrX\Result\DiagnosticsCollector;
 use AstrX\Result\Result;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Raw imageboard image endpoint — no template wrapping (page template=0).

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -14,8 +14,9 @@ use AstrX\Imageboard\ThreadRepository;
 use AstrX\Result\DiagnosticsCollector;
 use AstrX\Result\Result;
 use AstrX\Routing\UrlGenerator;
-use AstrX\Site\DefaultTemplateContext;
+use AstrX\Template\TemplateVars;
 use function AstrX\Support\langDir;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Overboard — a combined catalog of the newest active threads across every
@@ -34,7 +35,7 @@ final class BoardOverboardController extends AbstractController
 
     public function __construct(
         DiagnosticsCollector                    $collector,
-        private readonly DefaultTemplateContext $ctx,
+        private readonly TemplateVars $ctx,
         private readonly Gate                   $gate,
         private readonly Translator             $t,
         private readonly UrlGenerator           $urlGen,

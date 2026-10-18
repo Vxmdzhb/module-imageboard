@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace AstrX\Controller;
+namespace AstrX\Imageboard\Controller;
 
 use AstrX\Auth\Gate;
 use AstrX\Auth\Permission;
@@ -12,6 +12,7 @@ use AstrX\Imageboard\PostRepository;
 use AstrX\Result\DiagnosticsCollector;
 use AstrX\Result\Result;
 use AstrX\Routing\UrlGenerator;
+use AstrX\Kernel\AbstractController;
 
 /**
  * Per-board Atom 1.0 feed — no template wrapping (page template=0, raw output).
