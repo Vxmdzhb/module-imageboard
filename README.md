@@ -2,6 +2,8 @@
 
 Imageboard: boards, threads, image posts, moderation and feeds — the **Imageboard** module of [AstrX](https://github.com/Vxmdzhb/astrx).
 
+![A thread on the imageboard](docs/screenshot.png)
+
 - Module key: `imageboard` (switch it on in the site's `resources/config/Modules.config.php`)
 - Pages: `admin_boards`, `admin_config_imageboard`, `board`, `board_feed`, `board_file`, `board_mod`, `board_overboard`, `board_search`
 - Requires: `astrx/cms`, `astrx/framework`, `astrx/library`
