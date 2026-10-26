@@ -50,7 +50,7 @@ final class ImageboardConfig
     private string $censorReplacement = '***';
     private bool   $reverseImageSearch = false; // per-image iqdb/SauceNAO links (off: third-party leak on Tor)
     private bool   $videoEnabled      = false;  // webm/mp4 attachments (HTML5 <video>, no thumbnails).
-    // SECURITY (F-20): enabled videos are stored VERBATIM — a zero-dependency app has no
+    // SECURITY: enabled videos are stored VERBATIM — a zero-dependency app has no
     // ffmpeg, so container metadata (GPS, creation time, device model) is NOT stripped the
     // way EXIF is stripped from images. Keep this OFF on anonymity-sensitive boards, or strip
     // video metadata out-of-band before serving.
@@ -163,15 +163,13 @@ final class ImageboardConfig
     private const SERVABLE_VIDEO_TYPES = ['webm', 'mp4'];
 
     /**
-     * Normalised, lower-cased list of allowed video extensions.
+     * The allowed video extensions, normalised and lower-cased.
      *
-     * Constrained to the SERVABLE video set (R6): videoMime() only accepts webm
-     * and mp4, so a configured type outside that set — or one overlapping the
-     * image uploadTypes (e.g. 'gif') — would route those uploads to storeVideo()
-     * where they fail the magic check and can no longer post as images. Unlike
-     * uploadTypes() this is NOT back-filled when empty: both consumers test
-     * membership (in_array) or build an accept="" hint, so [] safely disables
-     * video rather than re-opening a hole.
+     * Limited to what can be served: videoMime() only knows webm and mp4, and a
+     * type that is also an image type (e.g. 'gif') would send image uploads down
+     * the video path, where they'd fail. Unlike uploadTypes() an empty list stays
+     * empty: both callers only test membership or build an accept="" hint, so []
+     * simply turns video off.
      *
      * @return list<string>
      */
@@ -227,7 +225,7 @@ final class ImageboardConfig
     /**
      * Normalised, lower-cased list of allowed upload extensions.
      *
-     * Constrained to the SERVABLE set (R3-24): with strip_exif OFF the sanitizer
+     * Constrained to the SERVABLE set: with strip_exif OFF the sanitizer
      * keeps a decodable-but-foreign image (e.g. bmp/tiff) verbatim under a '.bin'
      * name that BoardFileController can never serve, so an admin-added type
      * outside the servable set is dropped here rather than stored unservable.

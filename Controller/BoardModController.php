@@ -845,7 +845,7 @@ final class BoardModController extends AbstractController
     }
 
     /**
-     * The last ~30 audit-log rows scoped to this board (feature 13: modlog).
+     * The last ~30 audit-log rows for this board (the mod log).
      *
      * @return list<array{time:string,username:string,action:string,detail:string}>
      */

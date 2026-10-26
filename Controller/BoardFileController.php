@@ -68,11 +68,9 @@ final class BoardFileController extends AbstractController
 
         $stored = self::mStr($row, $wantThumb ? 'thumb_name' : 'full_name');
 
-        // Whitelist the on-disk name and mime to exactly what ImageService writes:
-        // images are re-encoded to jpg/png; videos are stored verbatim as webm/mp4.
-        // Images: accept every format the ImageSanitizer can emit — jpg/png from
-        // the re-encode path, plus gif/webp kept verbatim when metadata-strip is
-        // OFF (animation opt-out). Previously gif/webp were stored yet 404'd (F-10).
+        // Accept only names and types ImageService writes. Images: jpg/png from
+        // re-encoding, plus gif/webp kept as they are when metadata stripping is off
+        // (to keep animations). Videos are stored as they are, webm/mp4.
         $namePattern  = $isVideo ? '/^[a-f0-9]{32}\.(?:webm|mp4)$/' : '/^[a-f0-9]{32}\.(?:jpg|png|gif|webp)$/';
         $allowedMimes = $isVideo ? ['video/webm', 'video/mp4'] : ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         if (preg_match($namePattern, $stored) !== 1 || !in_array($mime, $allowedMimes, true)) {

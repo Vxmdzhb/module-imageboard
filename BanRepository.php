@@ -186,8 +186,7 @@ final class BanRepository
     }
 
     /**
-     * Lift a ban (deactivate). The row is kept for the audit trail rather than
-     * deleted.
+     * Lift a ban. The row is kept, deactivated, for the audit trail.
      *
      * @return Result<bool>
      */

@@ -236,7 +236,7 @@ final class AdminConfigImageboardController extends AbstractController
         $storePosterIp = $maySetAnonymity ? self::mBool($p, 'store_poster_ip') : $this->config->storePosterIp();
 
         return [
-            // R11 (MED): upload_dir is system-level (repoints where board uploads
+            // upload_dir is system-level (repoints where board uploads
             // are written/served, potentially outside the BOARD_VIEW-gated file
             // controller); preserve it for a non-system actor like the two knobs above.
             'upload_dir'          => $maySetAnonymity ? self::mStr($p, 'upload_dir', '') : $this->config->uploadDirRaw(),
