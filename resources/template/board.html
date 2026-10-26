@@ -47,10 +47,12 @@
     /* Prominent "open thread" link under each index thread. */
     .thread-open{margin:5px 0;}
     #board .thread-open a{font-weight:bold;text-decoration:underline;}
-    /* Replies stack VERTICALLY (display:block). Post background follows the board
-       style — default transparent (the site background); themed styles give it a
-       colour. The OP stays on the board background so it stands out. */
-    .post{background:var(--bd-post-bg);border:1px solid var(--bd-border);padding:5px 8px;margin:4px 0;display:block;max-width:100%;box-sizing:border-box;}
+    /* Replies stack vertically, and each post contains its floated image
+       (display:flow-root), so a tall image can't hang over the next post. Post
+       background follows the board style — default transparent (the site
+       background); themed styles give it a colour. The OP stays on the board
+       background so it stands out. */
+    .post{background:var(--bd-post-bg);border:1px solid var(--bd-border);padding:5px 8px;margin:4px 0;display:flow-root;max-width:100%;box-sizing:border-box;}
     .post.op{background:transparent;border:0;padding:3px 0;}
     .post.reply{margin-left:20px;}
     .post-head{margin:0 0 4px;}
