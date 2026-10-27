@@ -1,6 +1,7 @@
 {
     "name": "astrx/module-imageboard",
     "description": "Imageboard: boards, threads, image posts, moderation and feeds",
+    "license": "LicenseRef-DoWhatever",
     "type": "astrx-module",
     "keywords": [
         "astrx",
