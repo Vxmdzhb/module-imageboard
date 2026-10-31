@@ -566,7 +566,6 @@ final class BoardController extends AbstractController
         // form shows no captcha for them at all.
         $show = $this->config->guestCaptcha() && !$this->authenticatedPoster();
         $this->ctx->set('show_captcha',      $show);
-        $this->ctx->set('has_captcha_frame', false);
         $cid = ''; $cimg = '';
         if ($show) {
             $gen = $this->captchaService->generate();
@@ -579,6 +578,7 @@ final class BoardController extends AbstractController
         }
         $this->ctx->set('captcha_id',    $cid);
         $this->ctx->set('captcha_image', $cimg);
+        $this->captchaService->presentReload($this->ctx, $this->urlGen, $this->t, $cid);
         $this->ctx->set('captcha_label', $this->t->t('board.captcha'));
     }
 
