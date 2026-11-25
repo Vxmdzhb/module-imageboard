@@ -11,7 +11,7 @@
     .search-form{border:1px solid var(--bd-border);background:transparent;padding:8px;margin:8px 0;}
     .search-form p{margin:4px 0;}
     .search-form input[type=text],.search-form select{background:transparent;color:inherit;border:1px solid var(--bd-border);padding:2px 4px;}
-    .search-form input[type=text]{min-width:16em;}
+    .search-form input[type=text]{width:16em;max-width:100%;box-sizing:border-box;}
     .search-form button{background:transparent;color:inherit;border:1px solid var(--bd-border);padding:2px 12px;cursor:pointer;}
     .search-form button:hover{text-decoration:underline;}
     .search-results{list-style:none;padding:0;margin:8px 0;}
@@ -24,6 +24,7 @@
     <div class="board-header"><h1>{{lbl_search_heading}}</h1></div>
 
     <form class="search-form" method="get" action="{{form_action}}">
+        {{#route_fields}}<input type="hidden" name="{{name}}" value="{{value}}">{{/route_fields}}
         {{&sid_input}}
         <p><label>{{lbl_search_query}} <input type="text" name="q" value="{{q}}" autocomplete="off"></label></p>
         {{#has_boards}}

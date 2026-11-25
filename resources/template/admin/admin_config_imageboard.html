@@ -71,6 +71,7 @@
 <h3>{{board_manage_heading}}</h3>
 <p>{{boards_intro}}</p>
 {{#has_boards}}
+<div class="table-scroll" tabindex="0" role="region" aria-label="{{table_scroll_label}}">
 <table>
   <thead>
   <tr>
@@ -106,6 +107,7 @@
   {{/boards}}
   </tbody>
 </table>
+</div>
 {{/has_boards}}
 {{^has_boards}}<p><em>{{boards_none}}</em></p>{{/has_boards}}
 

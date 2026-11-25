@@ -314,7 +314,7 @@ final class AdminConfigImageboardController extends AbstractController
                 'cooldown'     => self::mInt($b, 'cooldown_secs'),
                 'max_replies'  => $maxReplies > 0 ? (string) $maxReplies : $default,
                 'thread_limit' => self::mInt($b, 'thread_limit'),
-                'edit_url'     => $selfUrl . '?edit=' . $bid,
+                'edit_url'     => $selfUrl . (str_contains($selfUrl, '?') ? '&' : '?') . 'edit=' . $bid,
                 'is_editing'   => $bid === $editId,
             ];
         }
