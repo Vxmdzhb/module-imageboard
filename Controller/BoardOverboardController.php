@@ -130,13 +130,11 @@ final class BoardOverboardController extends AbstractController
 
     private function threadUrl(string $slug, int $tid): string
     {
-        return $this->urlGen->toPage($this->t->t('WORDING_BOARD'))
-            . '/' . rawurlencode($slug) . '/thread/' . $tid;
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid]);
     }
 
     private function fileUrl(string $token, bool $thumb): string
     {
-        $base = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FILE'));
-        return $base . '?t=' . rawurlencode($token) . ($thumb ? '&thumb=1' : '');
+        return $this->urlGen->toPage($this->t->t('WORDING_BOARD_FILE'), $thumb ? ['t' => $token, 'thumb' => 1] : ['t' => $token]);
     }
 }

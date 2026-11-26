@@ -145,7 +145,6 @@ final class BoardSearchController extends AbstractController
 
     private function threadUrl(string $slug, int $tid): string
     {
-        return $this->urlGen->toPage($this->t->t('WORDING_BOARD'))
-            . '/' . rawurlencode($slug) . '/thread/' . $tid;
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid]);
     }
 }

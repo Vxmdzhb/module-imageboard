@@ -48,7 +48,8 @@ final class BoardController extends AbstractController
     private array $roleColorByUid = [];
 
     /** Thread URL a clicked post No. quotes into (varies per thread on the index). */
-    private string $quoteBase = '';
+    /** @var array{string,int}|null the thread a post's quote link points to: [slug, thread id] */
+    private ?array $quoteThread = null;
 
     /**
      * Reply backlinks for the current render: post No. → the list of Nos that
@@ -142,26 +143,23 @@ final class BoardController extends AbstractController
         $cur    = is_string($curRaw) ? $curRaw : '';
         $this->ctx->set('board_style', $cur);
 
-        // Reload the CURRENT board view when switching (path without query),
-        // falling back to the board base if the server did not expose the URI.
-        $uriRaw = $this->request->server()->get('REQUEST_URI');
-        $uri    = is_scalar($uriRaw) ? (string) $uriRaw : '';
-        $path   = strtok($uri, '?');
-        if ($path === false) {
-            $path = $this->boardBase();
-        }
+        // Switching reloads the CURRENT board view (same board, thread or
+        // catalog), built by the router so it works in query mode too.
+        $here = fn (string $style): string => $this->urlGen->toPagePath(
+            $this->t->t('WORDING_BOARD'), $this->currentUrl->tail(), ['style' => $style],
+        );
 
         $styles = [[
             'name'  => 'default',
             'label' => $this->t->t('board.style_default'),
-            'url'   => $path . '?style=default',
+            'url'   => $here('default'),
             'cur'   => $cur === '',
         ]];
         foreach (self::STYLES as $s) {
             $styles[] = [
                 'name'  => $s,
                 'label' => $this->t->t('board.style_' . str_replace('-', '_', $s)),
-                'url'   => $path . '?style=' . $s,
+                'url'   => $here($s),
                 'cur'   => $cur === $s,
             ];
         }
@@ -269,7 +267,7 @@ final class BoardController extends AbstractController
                 continue;
             }
             // Clicking a post No. in this thread's preview quotes into this thread.
-            $this->quoteBase = $this->threadUrl($slug, $tid);
+            $this->quoteThread = [$slug, $tid];
             $replies = [];
             foreach ($previewByThread[$tid] ?? [] as $p) {
                 $replies[] = $this->postCtx($p, $imagesByPost);
@@ -388,7 +386,7 @@ final class BoardController extends AbstractController
         $this->buildRoleColors($uids);
         $this->buildBacklinks($postRows);
         // Clicking a post No. in this thread quotes into this same thread.
-        $this->quoteBase = $this->threadUrl($slug, $tid);
+        $this->quoteThread = [$slug, $tid];
 
         $posts = [];
         foreach ($postRows as $p) {
@@ -661,7 +659,7 @@ final class BoardController extends AbstractController
         // BoardModController surface is reachable from the board itself.
         $canMod = $this->gate->can(ImageboardPermission::MODERATE);
         $modUrl = $canMod
-            ? $this->urlGen->toPage($this->t->t('WORDING_BOARD_MOD')) . '?board=' . rawurlencode($slug)
+            ? $this->urlGen->toPage($this->t->t('WORDING_BOARD_MOD'), ['board' => $slug])
             : '';
         $this->ctx->set('can_moderate', $canMod);
         $this->ctx->set('mod_url', $modUrl);
@@ -680,8 +678,8 @@ final class BoardController extends AbstractController
 
         // Discovery links (Atom feed for this board, cross-board overboard,
         // search). Built from the seeded page wordings; all no-JS.
-        $feedUrl   = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FEED')) . '?board=' . rawurlencode($slug);
-        $searchUrl = $this->urlGen->toPage($this->t->t('WORDING_BOARD_SEARCH')) . '?board=' . rawurlencode($slug);
+        $feedUrl   = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FEED'), ['board' => $slug]);
+        $searchUrl = $this->urlGen->toPage($this->t->t('WORDING_BOARD_SEARCH'), ['board' => $slug]);
         $this->ctx->set('feed_url',      $feedUrl);
         $this->ctx->set('overboard_url', $this->urlGen->toPage($this->t->t('WORDING_BOARD_OVERBOARD')));
         $this->ctx->set('search_url',    $searchUrl);
@@ -838,7 +836,9 @@ final class BoardController extends AbstractController
             // Role colour for this poster (empty for anon/unmapped roles).
             'name_color'  => $uid !== '' ? ($this->roleColorByUid[$uid] ?? '') : '',
             // Link that quotes this post into the reply box (>>no).
-            'quote_url'   => $this->quoteBase !== '' ? $this->quoteBase . '?quote=' . $no . '#board-post-form' : '',
+            'quote_url'   => $this->quoteThread !== null
+                ? $this->threadUrl($this->quoteThread[0], $this->quoteThread[1], ['quote' => $no]) . '#board-post-form'
+                : '',
             'subject'     => self::mStr($post, 'subject'),
             'has_subject' => self::mStr($post, 'subject') !== '',
             'body_html'   => self::mStr($post, 'body_html'),
@@ -953,30 +953,25 @@ final class BoardController extends AbstractController
 
     // ── URL + IP helpers ──────────────────────────────────────────────────────
 
-    private function boardBase(): string
-    {
-        return $this->urlGen->toPage($this->t->t('WORDING_BOARD'));
-    }
-
     private function indexUrl(string $slug): string
     {
-        return $this->boardBase() . '/' . rawurlencode($slug);
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug]);
     }
 
     private function catalogUrl(string $slug): string
     {
-        return $this->indexUrl($slug) . '/catalog';
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'catalog']);
     }
 
-    private function threadUrl(string $slug, int $tid): string
+    /** @param array<string, scalar> $query */
+    private function threadUrl(string $slug, int $tid, array $query = []): string
     {
-        return $this->indexUrl($slug) . '/thread/' . $tid;
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid], $query);
     }
 
     private function fileUrl(string $token, bool $thumb): string
     {
-        $base = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FILE'));
-        return $base . '?t=' . rawurlencode($token) . ($thumb ? '&thumb=1' : '');
+        return $this->urlGen->toPage($this->t->t('WORDING_BOARD_FILE'), $thumb ? ['t' => $token, 'thumb' => 1] : ['t' => $token]);
     }
 
     /**

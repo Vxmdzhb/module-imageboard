@@ -61,7 +61,7 @@ final class BoardNav
                 continue;
             }
             $items[] = [
-                'url'       => $base . '/' . rawurlencode($slug),
+                'url'       => $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug]),
                 'name'      => '/' . $slug . '/',
                 'highlight' => $active === $slug,
             ];

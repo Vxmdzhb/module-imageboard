@@ -68,7 +68,6 @@ final class BoardFeedController extends AbstractController
         $rows = $pR->isOk() ? $pR->unwrap() : [];
 
         $feedUrl   = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FEED'), ['board' => $slug]);
-        $boardBase = $this->urlGen->toPage($this->t->t('WORDING_BOARD'));
 
         // Feed <updated> is the newest post's time (rows are newest-first); with
         // no posts, fall back to "now" so the document is still valid.
@@ -89,7 +88,7 @@ final class BoardFeedController extends AbstractController
             $ts      = self::mInt($row, 'created_ts');
 
             // Site-relative thread URL, fragment-anchored to this post.
-            $postUrl = $boardBase . '/' . rawurlencode($slug) . '/thread/' . $tid . '#p' . $no;
+            $postUrl = $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid]) . '#p' . $no;
             $entryId = 'urn:astrx:board:' . $slug . ':' . $no;
             $entryTt = $subject !== '' ? $subject : 'No.' . $no;
 

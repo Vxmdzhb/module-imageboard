@@ -1001,11 +1001,11 @@ final class BoardModController extends AbstractController
         // shown on the mod page so the mod sections read as an ADDITIONAL bar,
         // not a replacement of the board's own nav. "Manage" is the active item.
         $boardIndex = $this->boardUrl($slug);
-        $searchUrl  = $this->urlGen->toPage($this->t->t('WORDING_BOARD_SEARCH')) . '?board=' . rawurlencode($slug);
-        $feedUrl    = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FEED')) . '?board=' . rawurlencode($slug);
+        $searchUrl  = $this->urlGen->toPage($this->t->t('WORDING_BOARD_SEARCH'), ['board' => $slug]);
+        $feedUrl    = $this->urlGen->toPage($this->t->t('WORDING_BOARD_FEED'), ['board' => $slug]);
         $this->ctx->set('board_local_nav', [
             ['url' => $boardIndex,              'name' => $this->t->t('board.index'),          'highlight' => false],
-            ['url' => $boardIndex . '/catalog', 'name' => $this->t->t('board.catalog'),        'highlight' => false],
+            ['url' => $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'catalog']), 'name' => $this->t->t('board.catalog'), 'highlight' => false],
             ['url' => $searchUrl,               'name' => $this->t->t('board.search_heading'), 'highlight' => false],
             ['url' => $feedUrl,                 'name' => $this->t->t('board.feed'),           'highlight' => false],
             ['url' => $base,                    'name' => $this->t->t('board.manage'),         'highlight' => true],
@@ -1024,17 +1024,17 @@ final class BoardModController extends AbstractController
 
     private function modBase(string $slug): string
     {
-        return $this->urlGen->toPage($this->t->t('WORDING_BOARD_MOD')) . '?board=' . rawurlencode($slug);
+        return $this->urlGen->toPage($this->t->t('WORDING_BOARD_MOD'), ['board' => $slug]);
     }
 
     private function boardUrl(string $slug): string
     {
-        return $this->urlGen->toPage($this->t->t('WORDING_BOARD')) . '/' . rawurlencode($slug);
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug]);
     }
 
     private function boardThreadUrl(string $slug, int $threadId): string
     {
-        return $this->boardUrl($slug) . '/thread/' . $threadId;
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $threadId]);
     }
 
     private function setLabels(): void
