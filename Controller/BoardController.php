@@ -29,6 +29,8 @@ use AstrX\Session\PrgHandler;
 use AstrX\Template\TemplateVars;
 use AstrX\User\UserSession;
 use AstrX\Kernel\AbstractController;
+use AstrX\Kernel\ReadsPathSegments;
+use AstrX\Routing\PathParameters;
 use AstrX\Imageboard\ImageboardPermission;
 
 /**
@@ -40,7 +42,7 @@ use AstrX\Imageboard\ImageboardPermission;
  * plus PRG-backed posting (new thread on the index, replies in a thread). No
  * board slug → a board list. All views work with JavaScript disabled.
  */
-final class BoardController extends AbstractController
+final class BoardController extends AbstractController implements ReadsPathSegments
 {
     private const FORM = 'board';
 
@@ -124,14 +126,50 @@ final class BoardController extends AbstractController
     /** The imageboard-only "styles" (classic themes), applied on top of the site theme. */
     private const STYLES = ['yotsuba', 'yotsuba-b', 'futaba', 'burichan', 'tomorrow', 'photon'];
 
+    /** @var array{0: list<string>, 1: array<string, string>}|null positions, then name/value pairs */
+    private ?array $path = null;
+
     /**
-     * Per-reader imageboard style (persisted in the session, no JS). A ?style=<name>
-     * query — from the Style selector — updates it; 'default' clears it. Sets the
-     * `board_style` class token and the selector list for the template.
+     * The path after the board page, split into the board's own positions
+     * (slug; slug/catalog; slug/thread/N) and the name/value parameters that
+     * follow them: /en/board/b/thread/4/quote/12.
+     *
+     * @return array{0: list<string>, 1: array<string, string>}
+     */
+    private function path(): array
+    {
+        if ($this->path !== null) {
+            return $this->path;
+        }
+        $tail = $this->currentUrl->tail();
+        $positions = 0;
+        if (isset($tail[0]) && is_array($this->boards->bySlug($tail[0])->valueOr(null))) {
+            $positions = match ($tail[1] ?? '') {
+                'catalog' => 2,
+                'thread'  => 3,
+                default   => 1,
+            };
+        }
+        return $this->path = [
+            array_slice($tail, 0, $positions),
+            PathParameters::parse(array_slice($tail, $positions)),
+        ];
+    }
+
+    /** A parameter from the path pairs, or the query string. */
+    private function param(string $name): mixed
+    {
+        return $this->path()[1][$name] ?? $this->request->query()->get($name);
+    }
+
+    /**
+     * Per-reader imageboard style (persisted in the session, no JS). A style
+     * parameter — from the Style selector — updates it; 'default' clears it.
+     * Sets the `board_style` class token and the selector list for the template.
      */
     private function setupStyle(): void
     {
-        $q = $this->request->query()->get('style');
+        $q = $this->param('style');
         if (is_string($q)) {
             if ($q === 'default') {
                 unset($_SESSION['board_style']);
@@ -146,7 +184,7 @@ final class BoardController extends AbstractController
         // Switching reloads the CURRENT board view (same board, thread or
         // catalog), built by the router so it works in query mode too.
         $here = fn (string $style): string => $this->urlGen->toPagePath(
-            $this->t->t('WORDING_BOARD'), $this->currentUrl->tail(), ['style' => $style],
+            $this->t->t('WORDING_BOARD'), $this->path()[0], ['style' => $style], pathParams: true,
         );
 
         $styles = [[
@@ -712,10 +750,10 @@ final class BoardController extends AbstractController
         $this->ctx->set('csrf_token',  $this->csrf->generate(self::FORM));
         $this->ctx->set('max_len',     self::mInt($board, 'max_post_len'));
 
-        // Quote pre-fill: arriving via a post-No. link (?quote=N) seeds the reply
+        // Quote pre-fill: arriving via a post-No. link (/quote/N) seeds the reply
         // box with ">>N". The template renders it into the textarea (Mustache-
         // escaped), so the browser submits the literal ">>N".
-        $quoteRaw = $this->request->query()->get('quote');
+        $quoteRaw = $this->param('quote');
         $quoteNo  = is_numeric($quoteRaw) ? (int) $quoteRaw : 0;
         $this->ctx->set('comment_prefill', $quoteNo > 0 ? '>>' . $quoteNo . "\n" : '');
 
@@ -788,8 +826,7 @@ final class BoardController extends AbstractController
         // anonymous/guest posts have an empty user_id and render a plain name.
         $uid        = self::mStr($post, 'user_id');
         $profileUrl = $uid !== ''
-            ? $this->urlGen->toPage($this->t->t('WORDING_PROFILE', fallback: 'WORDING_PROFILE'))
-              . '?uid=' . rawurlencode($uid)
+            ? $this->urlGen->toPagePath($this->t->t('WORDING_PROFILE', fallback: 'WORDING_PROFILE'), [], ['uid' => $uid], pathParams: true)
             : '';
 
         $revEnabled = $this->config->reverseImageSearch();
@@ -966,7 +1003,7 @@ final class BoardController extends AbstractController
     /** @param array<string, scalar> $query */
     private function threadUrl(string $slug, int $tid, array $query = []): string
     {
-        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid], $query);
+        return $this->urlGen->toPagePath($this->t->t('WORDING_BOARD'), [$slug, 'thread', (string) $tid], $query, pathParams: true);
     }
 
     private function fileUrl(string $token, bool $thumb): string

@@ -181,7 +181,7 @@ final class BoardModController extends AbstractController
         $bid  = self::mInt($board, 'id');
         $slug = self::mStr($board, 'slug');
         $this->ctx->set('is_reports', true);
-        $this->seedForm($this->modBase($slug) . '&view=reports');
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['view' => 'reports']));
 
         $rR   = $this->reports->open($bid);
         $rows = $rR->isOk() ? $rR->unwrap() : [];
@@ -196,7 +196,7 @@ final class BoardModController extends AbstractController
                 'reason'     => self::mStr($row, 'reason'),
                 'excerpt'    => $this->excerpt(self::mStr($row, 'body_html')),
                 'thread_url' => $this->boardThreadUrl($slug, $tid) . '#p' . $no,
-                'post_url'   => $this->modBase($slug) . '&post=' . $no,
+                'post_url'   => $this->urlGen->withParams($this->modBase($slug), ['post' => $no]),
             ];
         }
         $this->ctx->set('reports',     $list);
@@ -213,7 +213,7 @@ final class BoardModController extends AbstractController
         $bid  = self::mInt($board, 'id');
         $slug = self::mStr($board, 'slug');
         $this->ctx->set('is_bans', true);
-        $this->seedForm($this->modBase($slug) . '&view=bans');
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['view' => 'bans']));
 
         $bnR  = $this->bans->activeForBoard($bid);
         $rows = $bnR->isOk() ? $bnR->unwrap() : [];
@@ -240,7 +240,7 @@ final class BoardModController extends AbstractController
     {
         $slug = self::mStr($board, 'slug');
         $this->ctx->set('is_blocks', true);
-        $this->seedForm($this->modBase($slug) . '&view=blocks');
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['view' => 'blocks']));
 
         $blR  = $this->blocks->all();
         $rows = $blR->isOk() ? $blR->unwrap() : [];
@@ -270,7 +270,7 @@ final class BoardModController extends AbstractController
         $bid  = self::mInt($board, 'id');
         $slug = self::mStr($board, 'slug');
         $this->ctx->set('is_staff', true);
-        $this->seedForm($this->modBase($slug) . '&view=staff');
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['view' => 'staff']));
 
         $rR   = $this->mods->roster($bid);
         $rows = $rR->isOk() ? $rR->unwrap() : [];
@@ -298,7 +298,7 @@ final class BoardModController extends AbstractController
         }
         $slug = self::mStr($board, 'slug');
         $this->ctx->set('is_settings', true);
-        $this->seedForm($this->modBase($slug) . '&view=settings');
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['view' => 'settings']));
 
         $this->ctx->set('s_title',        self::mStr($board, 'title'));
         $this->ctx->set('s_subtitle',     self::mStr($board, 'subtitle'));
@@ -334,7 +334,7 @@ final class BoardModController extends AbstractController
         $pid = self::mInt($post, 'id');
         $tid = self::mInt($post, 'thread_id');
         $this->ctx->set('is_moderate_post', true);
-        $this->seedForm($this->modBase($slug) . '&post=' . $no);
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['post' => $no]));
         $this->ctx->set('mp_no',         $no);
         $this->ctx->set('mp_body',       self::mStr($post, 'body_html'));
         $this->ctx->set('mp_post_id',    $pid);
@@ -358,7 +358,7 @@ final class BoardModController extends AbstractController
             return $this->viewDashboard($board);
         }
         $this->ctx->set('is_moderate_thread', true);
-        $this->seedForm($this->modBase($slug) . '&thread=' . $threadId);
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['thread' => $threadId]));
         $this->ctx->set('mt_subject',    self::mStr($thread, 'subject'));
         $this->ctx->set('mt_thread_id',  $threadId);
         $this->ctx->set('mt_sticky',     self::mBool($thread, 'sticky'));
@@ -384,7 +384,7 @@ final class BoardModController extends AbstractController
             exit;
         }
         $this->ctx->set('is_report_form', true);
-        $this->seedForm($this->modBase($slug) . '&report=' . $no);
+        $this->seedForm($this->urlGen->withParams($this->modBase($slug), ['report' => $no]));
         $this->ctx->set('rf_no',        $no);
         $this->ctx->set('rf_excerpt',   $this->excerpt(self::mStr($post, 'body_html')));
         $this->ctx->set('rf_post_id',   self::mInt($post, 'id'));
@@ -450,7 +450,7 @@ final class BoardModController extends AbstractController
         $reportId = self::mInt($posted, 'report_id');
         $this->reports->resolve($reportId, $bid)->drainTo($this->collector);
         $this->audit->log('board.resolve_report', 'board:' . $slug, 'report #' . $reportId);
-        return $this->modBase($slug) . '&view=reports';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'reports']);
     }
 
     /**
@@ -463,7 +463,7 @@ final class BoardModController extends AbstractController
         $banId = self::mInt($posted, 'ban_id');
         $this->bans->lift($banId)->drainTo($this->collector);
         $this->audit->log('board.lift_ban', 'board:' . $slug, 'ban #' . $banId);
-        return $this->modBase($slug) . '&view=bans';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'bans']);
     }
 
     /**
@@ -476,7 +476,7 @@ final class BoardModController extends AbstractController
         $blockId = self::mInt($posted, 'block_id');
         $this->blocks->remove($blockId)->drainTo($this->collector);
         $this->audit->log('board.unblock_image', 'board:' . $slug, 'block #' . $blockId);
-        return $this->modBase($slug) . '&view=blocks';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'blocks']);
     }
 
     /**
@@ -567,7 +567,7 @@ final class BoardModController extends AbstractController
             $this->audit->log('board.delete_post', 'board:' . $slug, 'No.' . $no);
             return $this->modBase($slug);
         }
-        return $this->modBase($slug) . '&post=' . $no;
+        return $this->urlGen->withParams($this->modBase($slug), ['post' => $no]);
     }
 
     /**
@@ -603,7 +603,7 @@ final class BoardModController extends AbstractController
             $this->audit->log('board.delete_post', 'board:' . $slug, 'No.' . $no);
             return $this->modBase($slug);
         }
-        return $this->modBase($slug) . '&post=' . $no;
+        return $this->urlGen->withParams($this->modBase($slug), ['post' => $no]);
     }
 
     /**
@@ -627,7 +627,7 @@ final class BoardModController extends AbstractController
                 $flag . '=' . ($value ? '1' : '0') . ' thread #' . $threadId,
             );
         }
-        return $this->modBase($slug) . '&thread=' . $threadId;
+        return $this->urlGen->withParams($this->modBase($slug), ['thread' => $threadId]);
     }
 
     /**
@@ -666,7 +666,7 @@ final class BoardModController extends AbstractController
     {
         $slug = self::mStr($board, 'slug');
         if ($this->gate->cannot(ImageboardPermission::ADMIN)) {
-            return $this->modBase($slug) . '&view=staff';
+            return $this->urlGen->withParams($this->modBase($slug), ['view' => 'staff']);
         }
         $bid      = self::mInt($board, 'id');
         $username = self::mStr($posted, 'username');
@@ -682,7 +682,7 @@ final class BoardModController extends AbstractController
                 $this->audit->log('board.grant_mod', 'board:' . $slug, $username . ' ' . $role);
             }
         }
-        return $this->modBase($slug) . '&view=staff';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'staff']);
     }
 
     /**
@@ -693,7 +693,7 @@ final class BoardModController extends AbstractController
     {
         $slug = self::mStr($board, 'slug');
         if ($this->gate->cannot(ImageboardPermission::ADMIN)) {
-            return $this->modBase($slug) . '&view=staff';
+            return $this->urlGen->withParams($this->modBase($slug), ['view' => 'staff']);
         }
         $bid   = self::mInt($board, 'id');
         $hexId = self::mStr($posted, 'user_id');
@@ -701,7 +701,7 @@ final class BoardModController extends AbstractController
             $this->mods->revoke($bid, $hexId)->drainTo($this->collector);
             $this->audit->log('board.revoke_mod', 'board:' . $slug, $hexId);
         }
-        return $this->modBase($slug) . '&view=staff';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'staff']);
     }
 
     /**
@@ -712,7 +712,7 @@ final class BoardModController extends AbstractController
     {
         $slug = self::mStr($board, 'slug');
         if ($this->gate->cannot(ImageboardPermission::ADMIN)) {
-            return $this->modBase($slug) . '&view=settings';
+            return $this->urlGen->withParams($this->modBase($slug), ['view' => 'settings']);
         }
         $bid = self::mInt($board, 'id');
 
@@ -739,7 +739,7 @@ final class BoardModController extends AbstractController
             $this->clampSmall(self::mInt($posted, 'cooldown_secs')),
         )->drainTo($this->collector);
         $this->audit->log('board.save_settings', 'board:' . $slug, '');
-        return $this->modBase($slug) . '&view=settings';
+        return $this->urlGen->withParams($this->modBase($slug), ['view' => 'settings']);
     }
 
     /**
@@ -960,11 +960,11 @@ final class BoardModController extends AbstractController
         $this->ctx->set('board_title', self::mStr($board, 'title'));
 
         $this->ctx->set('mod_base',     $base);
-        $this->ctx->set('reports_url',  $base . '&view=reports');
-        $this->ctx->set('bans_url',     $base . '&view=bans');
-        $this->ctx->set('blocks_url',   $base . '&view=blocks');
-        $this->ctx->set('staff_url',    $base . '&view=staff');
-        $this->ctx->set('settings_url', $base . '&view=settings');
+        $this->ctx->set('reports_url',  $this->urlGen->withParams($base, ['view' => 'reports']));
+        $this->ctx->set('bans_url',     $this->urlGen->withParams($base, ['view' => 'bans']));
+        $this->ctx->set('blocks_url',   $this->urlGen->withParams($base, ['view' => 'blocks']));
+        $this->ctx->set('staff_url',    $this->urlGen->withParams($base, ['view' => 'staff']));
+        $this->ctx->set('settings_url', $this->urlGen->withParams($base, ['view' => 'settings']));
         $this->ctx->set('board_url',    $this->boardUrl($slug));
 
         $canMod    = $this->gate->can(ImageboardPermission::MODERATE);
@@ -983,13 +983,13 @@ final class BoardModController extends AbstractController
             'highlight' => $view === '' || $view === 'dashboard',
         ]];
         if ($canMod) {
-            $modNav[] = ['url' => $base . '&view=reports', 'name' => $this->t->t('board.mod.reports'), 'highlight' => $view === 'reports'];
-            $modNav[] = ['url' => $base . '&view=bans',    'name' => $this->t->t('board.mod.bans'),    'highlight' => $view === 'bans'];
-            $modNav[] = ['url' => $base . '&view=blocks',  'name' => $this->t->t('board.mod.blocks'),  'highlight' => $view === 'blocks'];
+            $modNav[] = ['url' => $this->urlGen->withParams($base, ['view' => 'reports']), 'name' => $this->t->t('board.mod.reports'), 'highlight' => $view === 'reports'];
+            $modNav[] = ['url' => $this->urlGen->withParams($base, ['view' => 'bans']),    'name' => $this->t->t('board.mod.bans'),    'highlight' => $view === 'bans'];
+            $modNav[] = ['url' => $this->urlGen->withParams($base, ['view' => 'blocks']),  'name' => $this->t->t('board.mod.blocks'),  'highlight' => $view === 'blocks'];
         }
         if ($canManage) {
-            $modNav[] = ['url' => $base . '&view=staff',    'name' => $this->t->t('board.mod.staff'),    'highlight' => $view === 'staff'];
-            $modNav[] = ['url' => $base . '&view=settings', 'name' => $this->t->t('board.mod.settings'), 'highlight' => $view === 'settings'];
+            $modNav[] = ['url' => $this->urlGen->withParams($base, ['view' => 'staff']),    'name' => $this->t->t('board.mod.staff'),    'highlight' => $view === 'staff'];
+            $modNav[] = ['url' => $this->urlGen->withParams($base, ['view' => 'settings']), 'name' => $this->t->t('board.mod.settings'), 'highlight' => $view === 'settings'];
         }
         // No "« Back" item here — the board's own default menu (Index / Catalog /
         // Search / Feed / Manage, built just below) already sits in the same nav
